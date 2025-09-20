@@ -26,7 +26,7 @@ class Evaluator:
         self.pred = 10
         self.loc_cfg_path = "code/configs/localization.yaml"
         self.traj_cfg_path = "code/configs/traj_pred.yaml"
-        self.joints_folder = "~/MonoTransmotion/code/real_time_data/"  # Update this path as needed
+        self.joints_folder = "code/real_time_data/"
         self.load_loc = "checkpoints/loc/best_loc_model.pth"
         self.load_traj = "checkpoints/traj_pred/best_traj_model.pth"
 

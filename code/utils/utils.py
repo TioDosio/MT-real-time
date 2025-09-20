@@ -90,6 +90,9 @@ def create_dataset(joints_folder):
     dic_jo = {'train':{'X':[], 'Y':[], 'names':[], 'kps':[], 'boxes_3d':[], 'boxes_2d':[], 'K':[], 'ego_pose':[], 'camera_pose':[], 'traj_3d_ego':[], 'image_path':[], 'traj_3d_fcos3d':[]}, \
               'test':{'X':[], 'Y':[], 'names':[], 'kps':[], 'boxes_3d':[], 'boxes_2d':[], 'K':[], 'ego_pose':[], 'camera_pose':[], 'traj_3d_ego':[],  'image_path':[], 'traj_3d_fcos3d':[]}}
     
+    # Expand the tilde in the path
+    joints_folder = os.path.expanduser(joints_folder)
+    
     for split in ['train', 'test']:
         path = os.path.join(joints_folder, split)
         list_files = os.listdir(path)

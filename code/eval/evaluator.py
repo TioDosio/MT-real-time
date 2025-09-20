@@ -1,11 +1,11 @@
 import datetime
 import os
-from utils import create_output_dir, create_dataset, load_config, joint2traj, recover_traj, loc2traj, batch_process_coords
-from models import create_loc_model, create_traj_model
+from code.utils import create_output_dir, create_dataset, load_config, joint2traj, recover_traj, loc2traj, batch_process_coords
+from code.models import create_loc_model, create_traj_model
 import sys
 sys.path.append('..')
-from train.losses import compute_ADE_FDE
-from data import KeypointsDataset
+from code.train.losses import compute_ADE_FDE
+from code.data import KeypointsDataset
 import torch
 import numpy as np
 import random
@@ -16,20 +16,19 @@ import time
 import copy
 from collections import defaultdict
 
-
 class Evaluator:
-    def __init__(self, args):
+    def __init__(self): 
 
-        self.eval_mode = args.eval_mode
-        self.r_seed = args.r_seed
-        self.bs = args.bs
-        self.obs = args.obs
-        self.pred = args.pred
-        self.loc_cfg_path = args.loc_cfg
-        self.traj_cfg_path = args.traj_cfg
-        self.joints_folder = args.joints_folder
-        self.load_loc = args.load_loc
-        self.load_traj = args.load_traj
+        self.eval_mode = "traj_pred"
+        self.r_seed = 42
+        self.bs = 1
+        self.obs = 10
+        self.pred = 10
+        self.loc_cfg_path = "code/configs/localization.yaml"
+        self.traj_cfg_path = "code/configs/traj_pred.yaml"
+        self.joints_folder = "~/MonoTransmotion/code/real_time_data/"  # Update this path as needed
+        self.load_loc = "checkpoints/loc/best_loc_model.pth"
+        self.load_traj = "checkpoints/traj_pred/best_traj_model.pth"
 
         # select device
         use_cuda = torch.cuda.is_available()

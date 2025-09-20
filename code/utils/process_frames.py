@@ -142,6 +142,7 @@ Y_ls = []
 name_ls = []
 kps_ls = []
 boxes_3d_ls = []
+boxes_2d_seq_ls = []
 ego_pose_ls = []
 traj_3d_ego_ls = []
 image_path_ls = []
@@ -232,6 +233,7 @@ for i in range(len(frame_appearing_id) - (seq_len * interval)):
             Y_ls.append(Y_seq)
             kps_ls.append(kps_seq)
             boxes_3d_ls.append(boxes_3d_seq)
+            boxes_2d_seq_ls.append(boxes_2d_seq)
             ego_pose_ls.append(ego_pose_seq)
             traj_3d_ego_ls.append(traj_3d_ego_seq)
             name_ls.append(name_seq)
@@ -239,7 +241,7 @@ for i in range(len(frame_appearing_id) - (seq_len * interval)):
 
 # save the data
 for i in range(len(X_ls)):
-    data = {'X':X_ls[i], 'Y':Y_ls[i], 'kps':kps_ls[i], 'boxes_3d':boxes_3d_ls[i], 'ego_pose':ego_pose_ls[i], 'traj_3d_ego':traj_3d_ego_ls[i], 'name':name_ls[i]}
+    data = {'X':X_ls[i], 'Y':Y_ls[i], 'kps':kps_ls[i], 'boxes_3d':boxes_3d_ls[i], 'boxes_2d':boxes_2d_seq_ls[i], 'ego_pose':ego_pose_ls[i], 'traj_3d_ego':traj_3d_ego_ls[i], 'name':name_ls[i]}
     with open(output_dir + str(i) + '.json', 'w') as f:
         json.dump(data, f)
 

@@ -1,8 +1,8 @@
 import datetime
 import os
-from utils import create_output_dir, create_dataset, load_config, joint2traj, recover_traj, loc2traj, batch_process_coords, save_checkpoint
-from models import create_loc_model, create_traj_model
-from data import KeypointsDataset
+from code.utils import create_output_dir, create_dataset, load_config, joint2traj, recover_traj, loc2traj, batch_process_coords, save_checkpoint
+from code.models import create_loc_model, create_traj_model
+from code.data import KeypointsDataset
 import torch
 import numpy as np
 import random

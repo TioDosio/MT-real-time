@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pyquaternion import Quaternion
 from pytorch3d.transforms import quaternion_to_matrix
-from utils import extract_labels, extract_labels_aux, extract_outputs, extract_outputs_no_detach
+from code.utils import extract_labels, extract_labels_aux, extract_outputs, extract_outputs_no_detach
 
 
 

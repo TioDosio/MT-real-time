@@ -46,7 +46,7 @@ class RealTimeDataCollector:
         self.create_local_frame(msg)
         renumbered_local_frames, renumbered_ego_frames = self.renumber_frames()
         self.save_frames(renumbered_local_frames, renumbered_ego_frames)
-    
+
         # evaluator = Evaluator()
         # evaluator.evaluate_traj_pred()
         
@@ -172,15 +172,16 @@ class RealTimeDataCollector:
         print(f"Frames: {self.valid_local_frames_count}/{number_frames} (seq_len={self.seq_len}, interval={self.interval})")
         self.valid_local_frames_count += 1
         
+        # Initialize return variables
+        renumbered_local_frames = []
+        renumbered_ego_frames = []
+        
         if len(self.local_frames) >= number_frames:
             # Get the first number_frames frames in chronological order and renumber them starting from 0
             local_frames_subset = self.local_frames[:number_frames]
             ego_frames_subset = self.ego_frames[:number_frames]
             
             # Renumber frames starting from 0, frames from the detection dont have a numbered id
-            renumbered_local_frames = []
-            renumbered_ego_frames = []
-            
             for i, frame in enumerate(local_frames_subset):
                 renumbered_frame = frame.copy()
                 renumbered_frame['frame'] = i
@@ -193,16 +194,16 @@ class RealTimeDataCollector:
         
         return renumbered_local_frames, renumbered_ego_frames
 
-    def save_json(self, frame_data, flag):
-        outdir = os.path.join('files', 'og')
+    def save_frames(self, local_frame_data, ego_frame_data):
+        outdir = os.path.join('code', 'real_time_data', 'files')
         os.makedirs(outdir, exist_ok=True)
-        if flag == 1:
-            local_file_path = os.path.join(outdir, 'local_frames.json')
-            with open(local_file_path, 'a') as f:
+        local_file_path = os.path.join(outdir, 'local_frames.json')
+        with open(local_file_path, 'a') as f:
+            for frame_data in local_frame_data:
                 f.write(json.dumps(frame_data) + '\n')
-        else:
-            ego_file_path = os.path.join(outdir, 'ego_frames.json')
-            with open(ego_file_path, 'a') as f:
+        ego_file_path = os.path.join(outdir, 'ego_frames.json')
+        with open(ego_file_path, 'a') as f:
+            for frame_data in ego_frame_data:
                 f.write(json.dumps(frame_data) + '\n')
 
 if __name__ == '__main__':

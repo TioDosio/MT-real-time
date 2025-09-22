@@ -4,6 +4,7 @@ import os
 from human_awareness_msgs.msg import PersonsList
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Point, TransformStamped
+from tf2_msgs.msg import TFMessage
 from code.eval.evaluator import Evaluator
 from code.utils.process_frames import process_frames
 
@@ -12,10 +13,13 @@ class RealTimeDataCollector:
         self.image_detections_msg = []
         self.local_frames = []
         self.ego_frames = []
+        self.camera_frames = []
         self.valid_local_frames_count = 0
-        self.latest_tf = None
+        self.latest_robot_tf = None
+        self.latest_camera_tf = None
         self.seq_len = 10
-        self.interval = 5 # our detection frequency is 5Hz, so interval of 5 means 1 second
+        self.interval = 1 # our detection frequency is 5Hz, so interval of 5 means 1 second
+        self.debug = True
 
         rospy.init_node('real_time_data_collector', anonymous=True)
         
@@ -24,32 +28,49 @@ class RealTimeDataCollector:
         
         # Subscribers
         self.image_detections_sub = rospy.Subscriber('/image_detections', PersonsList, self.image_detections_callback)
-        self.tf_sub = rospy.Subscriber('/robot_tf', TransformStamped, self.tf_callback)
+        self.tf_sub = rospy.Subscriber('/combined_tf', TFMessage, self.tf_callback)
         
         # Publisher for trajectory visualization
         self.trajectory_pub = rospy.Publisher('/trajectory_predictions', MarkerArray, queue_size=10)
 
     def tf_callback(self, msg):
-        self.latest_tf = msg
+        # Extract robot and camera transforms from TFMessage
+        for i, transform in enumerate(msg.transforms):
+            if transform.child_frame_id == "base_footprint":
+                self.latest_robot_tf = transform
+            elif transform.child_frame_id == "l_eye_link" or "camera" in transform.child_frame_id.lower():
+                self.latest_camera_tf = transform
 
     def image_detections_callback(self, msg):
         if not msg.persons:
             return
-        rospy.logdebug(f"Received PersonsList with {len(msg.persons)} persons.")
         self.image_detections_msg.append(msg)
         
-        # First create ego frame to ensure TF data
-        if not self.create_ego_frame():
-            rospy.logwarn("Skipping frame due to missing TF data")
+        # Create both ego and camera frames
+        ego_created = self.create_ego_frame()
+        camera_created = self.create_camera_pose_frame()
+        
+        # Skip frame only if both are missing
+        if not ego_created and not camera_created:
+            print("Skipping frame due to missing BOTH TF data")
             return
+        elif not ego_created:
+            print("Warning: Missing robot TF data, but continuing with camera data")
+        elif not camera_created:
+            print("Warning: Missing camera TF data, but continuing with robot data")
             
         self.create_local_frame(msg)
         renumbered_local_frames, renumbered_ego_frames = self.renumber_frames()
         #self.save_frames(renumbered_local_frames, renumbered_ego_frames)
+        
+        if len(self.local_frames) > self.seq_len * self.interval + 1:
+            X, Y, name, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path = process_frames(self.seq_len, self.interval, renumbered_local_frames, renumbered_ego_frames, self.camera_frames)
+            observations, ground_truth, predictions = self.evaluator.evaluate_traj_pred(self.debug, X, Y, name, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path)
+            print(f"Observations: {observations}")
+            print(f"Ground Truth: {ground_truth}")
+            print(f"Predictions: {predictions}")
+            publish_trajectory(observations, ground_truth, predictions)
 
-        X, Y, name, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path = process_frames(self.seq_len, self.interval, renumbered_local_frames, renumbered_ego_frames)
-
-        predictions = self.evaluator.evaluate_traj_pred(X, Y, name, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path)
 
     def spin(self):
         rospy.loginfo('RealTimeDataCollector spinning...')
@@ -90,17 +111,40 @@ class RealTimeDataCollector:
         }
         self.local_frames.append(frame_data)
 
-    def create_ego_frame(self):
-        # Get latest tf data from the subscriber
-        if self.latest_tf is not None:
+    def create_camera_pose_frame(self):
+        # Get latest camera_pose tf data from the subscriber
+        if self.latest_camera_tf is not None:
             coordinates = {
-                "x": self.latest_tf.transform.translation.x,
-                "y": self.latest_tf.transform.translation.z,  # Swap y and z
-                "z": self.latest_tf.transform.translation.y,
-                "q1": self.latest_tf.transform.rotation.x,
-                "q2": self.latest_tf.transform.rotation.y,
-                "q3": self.latest_tf.transform.rotation.z,
-                "q4": self.latest_tf.transform.rotation.w
+                "x": self.latest_camera_tf.transform.translation.x,
+                "y": self.latest_camera_tf.transform.translation.z,  # Swap y and z
+                "z": self.latest_camera_tf.transform.translation.y,
+                "q1": self.latest_camera_tf.transform.rotation.x,
+                "q2": self.latest_camera_tf.transform.rotation.y,
+                "q3": self.latest_camera_tf.transform.rotation.z,
+                "q4": self.latest_camera_tf.transform.rotation.w
+            }
+            frame_data = {
+                "frame": self.valid_local_frames_count,
+                "coordinates": coordinates
+            }
+            self.camera_frames.append(frame_data)
+            return True
+        else:
+            print("No Camera_pose TF data available")
+            rospy.logwarn_throttle(1, "No Camera_pose TF data received yet")
+            return False
+        
+    def create_ego_frame(self):
+        # Get latest robot tf data from the subscriber
+        if self.latest_robot_tf is not None:
+            coordinates = {
+                "x": self.latest_robot_tf.transform.translation.x,
+                "y": self.latest_robot_tf.transform.translation.z,  # Swap y and z
+                "z": self.latest_robot_tf.transform.translation.y,
+                "q1": self.latest_robot_tf.transform.rotation.x,
+                "q2": self.latest_robot_tf.transform.rotation.y,
+                "q3": self.latest_robot_tf.transform.rotation.z,
+                "q4": self.latest_robot_tf.transform.rotation.w
             }
             frame_data = {
                 "frame": self.valid_local_frames_count,
@@ -109,8 +153,8 @@ class RealTimeDataCollector:
             self.ego_frames.append(frame_data)
             return True
         else:
+            print("No robot TF data available")
             rospy.logwarn_throttle(1, "No TF data received yet")
-            exit()
             return False
 
     def create_bbox(self, body_parts):

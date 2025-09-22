@@ -71,10 +71,10 @@ class Evaluator:
             print(">>> Total params: {:.3f}M".format(self.total_parameters / 1000000.0))
 
 
-    def evaluate_traj_pred(self, X, Y, names, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path):
+    def evaluate_traj_pred(self, debug, X, Y, names, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path):
         # Dataloader
         print(">>> creating dataloaders")
-        self.dic_jo = create_dataset(X, Y, names, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path)
+        self.dic_jo = create_dataset(debug, X, Y, names, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path)
         self.dataloaders = {phase: DataLoader(KeypointsDataset(self.dic_jo, phase=phase),
                                             batch_size=self.bs, shuffle=False) for phase in ['test']} #dict to store dataloaders
 

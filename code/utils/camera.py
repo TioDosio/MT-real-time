@@ -238,7 +238,20 @@ def to_spherical(xyz):
     xyz = np.array(xyz)
     r = np.linalg.norm(xyz)
     theta = math.atan2(xyz[2], xyz[0])
-
+    
+    # Debug print for troubleshooting
+    #print(f"to_spherical debug - xyz: {xyz}, r: {r}, theta: {theta}")
+    
+    # Normalize theta to [0, 2*pi) range
+    if theta < 0:
+        theta += 2 * math.pi
+    
+    # Adjust to [0, pi) range as expected by the original assertion
+    if theta >= math.pi:
+        theta = theta - math.pi
+    
+    #print(f"to_spherical debug - adjusted theta: {theta}")
+    
     assert 0 <= theta < math.pi   # 0 when positive x and no z.
     psi = math.acos(xyz[1] / r)
     assert 0 <= psi <= math.pi

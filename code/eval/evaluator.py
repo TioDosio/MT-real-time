@@ -55,20 +55,6 @@ class Evaluator:
                 self.traj_config["DEVICE"] = f"cuda:{torch.cuda.current_device()}"
             else:
                 self.traj_config["DEVICE"] = "cpu"
- 
-
-
-        # Dataloader
-        print(">>> creating dataloaders")
-        self.dic_jo = create_dataset(self.joints_folder)
-        self.dataloaders = {phase: DataLoader(KeypointsDataset(self.dic_jo, phase=phase),
-                                            batch_size=self.bs, shuffle=False) for phase in ['test']} #dict to store dataloaders
-        self.dataset_sizes = {phase: len(KeypointsDataset(self.dic_jo, phase=phase))
-                            for phase in ['test']}
-
-        print('Sizes of the dataset: {}'.format(self.dataset_sizes))
-
-
         # create models
         if self.eval_mode in ["loc", "traj_pred"]:
             self.loc_model = create_loc_model(self.loc_config)
@@ -85,56 +71,12 @@ class Evaluator:
             print(">>> Total params: {:.3f}M".format(self.total_parameters / 1000000.0))
 
 
-    def evaluate_loc(self):
-
-        # Average distance on training and test set after unnormalizing
-        self.loc_model.eval()
-        dataset = KeypointsDataset(self.dic_jo, phase='test')         
-
-        size_eval = len(dataset) 
-        size_eval_seq = size_eval * (self.obs + self.pred) 
-        start = 0
-        epoch_ade = 0
-        epoch_fde = 0
-        epoch_traj_count = 0
-
-
-        with torch.no_grad():
-            for end in range(self.bs, size_eval + self.bs, self.bs):
-                end = end if end < size_eval else size_eval
-                inputs, labels, _, _, ego_pose, camera_pose, traj_3d_ego, _, _ = dataset[start:end]
-                
-                labels = labels.to(self.device)
-                batch_size, seq_length, _ = inputs.size()
-                labels = labels.view(batch_size * seq_length, -1) # 3d localization (10)
-
-                
-                scene_train_real_ped, scene_train_mask, padding_mask = joint2traj(inputs)
-
-                traj_3d_ego = traj_3d_ego.to(self.device)
-                scene_train_real_ped = scene_train_real_ped.to(self.loc_config["DEVICE"])
-                scene_train_mask = scene_train_mask.to(self.loc_config["DEVICE"])
-                padding_mask = padding_mask.to(self.loc_config["DEVICE"])
-
-                scene_train_real_ped = scene_train_real_ped[:,0,:,:,:]
-                scene_train_mask = scene_train_mask[:,0,:,:]
-
-                start = end
-
-                # Forward pass
-                outputs = self.loc_model(scene_train_real_ped, padding_mask)
-                ade, fde, traj_count = compute_ADE_FDE(outputs, ego_pose, camera_pose, traj_3d_ego, batch_size)
-                epoch_ade += ade
-                epoch_fde += fde
-                epoch_traj_count += traj_count
-        
-
-        epoch_ade = epoch_ade / epoch_traj_count
-        epoch_fde = epoch_fde / epoch_traj_count
-        print(f"ADE: {epoch_ade}, FDE: {epoch_fde}")
-
-
-    def evaluate_traj_pred(self):
+    def evaluate_traj_pred(self, X, Y, names, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path):
+        # Dataloader
+        print(">>> creating dataloaders")
+        self.dic_jo = create_dataset(X, Y, names, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path)
+        self.dataloaders = {phase: DataLoader(KeypointsDataset(self.dic_jo, phase=phase),
+                                            batch_size=self.bs, shuffle=False) for phase in ['test']} #dict to store dataloaders
 
         self.loc_model.eval()
         self.traj_model.eval()
@@ -201,39 +143,5 @@ class Evaluator:
 
                 obs_pred_ls.append(obs_pred)
                 gt_traj_ls.append(traj_3d_ego.cpu().numpy()[0,:,:2])
-
-
-                for k in range(len(out_joints)):
-
-                    person_out_joints = out_joints[k,:,0:1]
-                    person_pred_joints = pred_joints[k,:,0:1]
-
-                    gt_xy = person_out_joints[:,0,:2]
-                    pred_xy = person_pred_joints[:,0,:2]
-                    sum_ade = 0
-
-                    for t in range(self.pred):
-                        d1 = (gt_xy[t,0].detach().cpu().numpy() - pred_xy[t,0].detach().cpu().numpy())
-                        d2 = (gt_xy[t,1].detach().cpu().numpy() - pred_xy[t,1].detach().cpu().numpy())
-                    
-                        dist_ade = [d1,d2]
-                        sum_ade += np.linalg.norm(dist_ade)
-                    
-                    sum_ade /= self.pred
-                    ade_batch += sum_ade
-                    d3 = (gt_xy[-1,0].detach().cpu().numpy() - pred_xy[-1,0].detach().cpu().numpy())
-                    d4 = (gt_xy[-1,1].detach().cpu().numpy() - pred_xy[-1,1].detach().cpu().numpy())
-                    dist_fde = [d3,d4]
-                    scene_fde = np.linalg.norm(dist_fde)
-
-                    fde_batch += scene_fde
-                    total_samples += 1
-                
-                batch_id+=1
-
-            ade_avg = ade_batch/total_samples
-            fde_avg = fde_batch/total_samples
-
-            print(f"ADE: {ade_avg}, FDE: {fde_avg}")
           
-            return ade_avg, fde_avg
+            return obs_pred_ls, gt_traj_ls, pred_outputs

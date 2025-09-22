@@ -7,6 +7,7 @@ from geometry_msgs.msg import Point, TransformStamped
 from tf2_msgs.msg import TFMessage
 from code.eval.evaluator import Evaluator
 from code.utils.process_frames import process_frames
+from view_predictions import TrajectoryEvaluator
 
 class RealTimeDataCollector:
     def __init__(self):
@@ -18,13 +19,14 @@ class RealTimeDataCollector:
         self.latest_robot_tf = None
         self.latest_camera_tf = None
         self.seq_len = 10
-        self.interval = 1 # our detection frequency is 5Hz, so interval of 5 means 1 second
-        self.debug = True
+        self.interval = 5 # our detection frequency is 5Hz, so interval of 5 means 1 second
+        self.debug = False
 
         rospy.init_node('real_time_data_collector', anonymous=True)
         
-        # Initialize the evaluator once
+        # Initialize the evaluator and trajectory evaluator once
         self.evaluator = Evaluator()
+        self.trajectory_evaluator = TrajectoryEvaluator()
         
         # Subscribers
         self.image_detections_sub = rospy.Subscriber('/image_detections', PersonsList, self.image_detections_callback)
@@ -66,10 +68,7 @@ class RealTimeDataCollector:
         if len(self.local_frames) > self.seq_len * self.interval + 1:
             X, Y, name, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path = process_frames(self.seq_len, self.interval, renumbered_local_frames, renumbered_ego_frames, self.camera_frames)
             observations, ground_truth, predictions = self.evaluator.evaluate_traj_pred(self.debug, X, Y, name, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path)
-            print(f"Observations: {observations}")
-            print(f"Ground Truth: {ground_truth}")
-            print(f"Predictions: {predictions}")
-            publish_trajectory(observations, ground_truth, predictions)
+            #self.trajectory_evaluator.publish_trajectory(observations, ground_truth, predictions)
 
 
     def spin(self):

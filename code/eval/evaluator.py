@@ -143,5 +143,50 @@ class Evaluator:
 
                 obs_pred_ls.append(obs_pred)
                 gt_traj_ls.append(traj_3d_ego.cpu().numpy()[0,:,:2])
-          
+                
+                if debug:
+                    # Debug information
+                    print(f"Debug - out_joints shape: {out_joints.shape}")
+                    print(f"Debug - pred_joints shape: {pred_joints.shape}")
+                    print(f"Debug - self.pred: {self.pred}")
+
+                    for k in range(len(out_joints)):
+
+                        person_out_joints = out_joints[k,:,0:1]
+                        person_pred_joints = pred_joints[k,:,0:1]
+
+                        gt_xy = person_out_joints[:,0,:2]
+                        pred_xy = person_pred_joints[:,0,:2]
+                        
+                        # Ensure we don't exceed the available data length
+                        min_len = min(len(gt_xy), len(pred_xy), self.pred)
+                        sum_ade = 0
+
+                        for t in range(min_len):
+                            d1 = (gt_xy[t,0].detach().cpu().numpy() - pred_xy[t,0].detach().cpu().numpy())
+                            d2 = (gt_xy[t,1].detach().cpu().numpy() - pred_xy[t,1].detach().cpu().numpy())
+                        
+                            dist_ade = [d1,d2]
+                            sum_ade += np.linalg.norm(dist_ade)
+                        
+                        sum_ade /= min_len if min_len > 0 else 1
+                        ade_batch += sum_ade
+                        
+                        # FDE calculation with bounds checking
+                        if min_len > 0:
+                            last_idx = min_len - 1
+                            d3 = (gt_xy[last_idx,0].detach().cpu().numpy() - pred_xy[last_idx,0].detach().cpu().numpy())
+                            d4 = (gt_xy[last_idx,1].detach().cpu().numpy() - pred_xy[last_idx,1].detach().cpu().numpy())
+                            dist_fde = [d3,d4]
+                            scene_fde = np.linalg.norm(dist_fde)
+                            fde_batch += scene_fde
+                        
+                        total_samples += 1
+                
+                batch_id+=1
+            if debug:
+                ade_avg = ade_batch/total_samples
+                fde_avg = fde_batch/total_samples
+                print(f"ADE: {ade_avg}, FDE: {fde_avg}")
+
             return obs_pred_ls, gt_traj_ls, pred_outputs

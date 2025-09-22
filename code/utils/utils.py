@@ -105,7 +105,10 @@ def create_dataset(debug,X, Y, names, kps, boxes_3d, boxes_2d, K, ego_pose, came
     
     ##save to json as debug with an if
     if debug:
-        debug_dir = '../../debug'
+        # Get the project root directory (MT-real-time)
+        current_dir = os.path.dirname(os.path.abspath(__file__))  # code/utils/
+        project_root = os.path.dirname(os.path.dirname(current_dir))  # MT-real-time/
+        debug_dir = os.path.join(project_root, 'debug')
         os.makedirs(debug_dir, exist_ok=True)
         debug_path = os.path.join(debug_dir, 'create_dataset_debug.json')
         with open(debug_path, 'w') as f:

@@ -85,34 +85,21 @@ def create_dataset_filter(joints_filter, joints_folder, obs):
     return dic_jo
 
 
-def create_dataset(joints_folder):
+def create_dataset(X, Y, names, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path):
     
-    dic_jo = {'train':{'X':[], 'Y':[], 'names':[], 'kps':[], 'boxes_3d':[], 'boxes_2d':[], 'K':[], 'ego_pose':[], 'camera_pose':[], 'traj_3d_ego':[], 'image_path':[], 'traj_3d_fcos3d':[]}, \
-              'test':{'X':[], 'Y':[], 'names':[], 'kps':[], 'boxes_3d':[], 'boxes_2d':[], 'K':[], 'ego_pose':[], 'camera_pose':[], 'traj_3d_ego':[],  'image_path':[], 'traj_3d_fcos3d':[]}}
-    
-    # Expand the tilde in the path
-    joints_folder = os.path.expanduser(joints_folder)
-    
-    for split in ['train', 'test']:
-        path = os.path.join(joints_folder, split)
-        list_files = os.listdir(path)
-        for file in list_files:
-            with open(os.path.join(path, file), 'r') as f:
-                dic = json.load(f)
+    dic_jo = {'test':{'X':[], 'Y':[], 'names':[], 'kps':[], 'boxes_3d':[], 'boxes_2d':[], 'K':[], 'ego_pose':[], 'camera_pose':[], 'traj_3d_ego':[],  'image_path':[], 'traj_3d_fcos3d':[]}}
 
-                # append to the dictionary
-                dic_jo[split]['X'].append(dic['X'])
-                dic_jo[split]['Y'].append(dic['Y'])
-                dic_jo[split]['names'].append(dic['names'])
-                dic_jo[split]['kps'].append(dic['kps'])
-                dic_jo[split]['boxes_3d'].append(dic['boxes_3d'])
-                dic_jo[split]['boxes_2d'].append(dic['boxes_2d'])
-                dic_jo[split]['K'].append(dic['K'])
-                dic_jo[split]['ego_pose'].append(dic['ego_pose'])
-                dic_jo[split]['camera_pose'].append(dic['camera_pose'])
-                dic_jo[split]['traj_3d_ego'].append(dic['traj_3d_ego'])
-                dic_jo[split]['image_path'].append(dic['image_path'])
-
+    dic_jo['test']['X'].append(X)
+    dic_jo['test']['Y'].append(Y)
+    dic_jo['test']['names'].append(names)
+    dic_jo['test']['kps'].append(kps)
+    dic_jo['test']['boxes_3d'].append(boxes_3d)
+    dic_jo['test']['boxes_2d'].append(boxes_2d)
+    dic_jo['test']['K'].append(K)
+    dic_jo['test']['ego_pose'].append(ego_pose)
+    dic_jo['test']['camera_pose'].append(camera_pose)
+    dic_jo['test']['traj_3d_ego'].append(traj_3d_ego)
+    dic_jo['test']['image_path'].append(image_path)
 
     return dic_jo
 

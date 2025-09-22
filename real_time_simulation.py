@@ -5,7 +5,7 @@ from human_awareness_msgs.msg import PersonsList
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Point, TransformStamped
 from code.eval.evaluator import Evaluator
-
+from code.utils.process_frames import process_frames
 
 class RealTimeDataCollector:
     def __init__(self):
@@ -45,56 +45,11 @@ class RealTimeDataCollector:
             
         self.create_local_frame(msg)
         renumbered_local_frames, renumbered_ego_frames = self.renumber_frames()
-        self.save_frames(renumbered_local_frames, renumbered_ego_frames)
+        #self.save_frames(renumbered_local_frames, renumbered_ego_frames)
 
-        # evaluator = Evaluator()
-        # evaluator.evaluate_traj_pred()
-        
-        # # If we have predictions and ground truth, compute metrics
-        # if predictions is not None and processed_data is not None and 'traj_3d_ego' in processed_data:
-        #     
-        #     # Get ground truth trajectories
-        #     gt_trajectories = processed_data['traj_3d_ego'][0]  # First batch
-        #     print(gt_trajectories)
-        #     # Compute metrics
-        #     metrics = compute_trajectory_metrics(predictions, gt_trajectories)
-        #     print_trajectory_metrics(metrics)
-        # # Use processed data for trajectory prediction
-        # if processed_data and len(processed_data['X']) > 0:
-        #     # Predict trajectories using the loaded model
-        #     predicted_trajectories = self.predict_trajectories(processed_data)
-        #     
-        #     if predicted_trajectories is not None:                    
-        #         # Publish predictions to RViz for visualization
-        #         self.publish_trajectory_predictions(predicted_trajectories , self.latest_tf.transform.translation.x, self.latest_tf.transform.translation.y, self.latest_tf.transform.translation.z)
-        #         
-        #         print(f"Successfully predicted trajectories for {len(predicted_trajectories)} person(s)")
-        #         
-        #         # You can save predictions to file or use them for further processing
-        #         # For example, save to JSON:
-        #         prediction_file = os.path.join('files', 'predictions.json')
-        #         os.makedirs(os.path.dirname(prediction_file), exist_ok=True)
-        #         
-        #         # Convert numpy arrays to lists for JSON serialization
-        #         json_predictions = []
-        #         for pred in predicted_trajectories:
-        #             json_pred = {
-        #                 'person_id': pred['person_id'],
-        #                 'observed_trajectory': pred['observed_trajectory'].tolist(),
-        #                 'predicted_trajectory': pred['predicted_trajectory'].tolist(),
-        #                 'full_trajectory': pred['full_trajectory'].tolist()
-        #             }
-        #             json_predictions.append(json_pred)
-        #         
-        #         with open(prediction_file, 'w') as f:
-        #             json.dump({
-        #                 'predictions': json_predictions,
-        #                 'timestamp': rospy.Time.now().to_sec(),
-        #                 'sequence_length': self.seq_len,
-        #                 'interval': self.interval
-        #             }, f, indent=2)
-        #     else:
-        #         print("Failed to predict trajectories")
+        X, Y, name, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path = process_frames(self.seq_len, self.interval, renumbered_local_frames, renumbered_ego_frames)
+
+        predictions = self.evaluator.evaluate_traj_pred(X, Y, name, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path)
 
     def spin(self):
         rospy.loginfo('RealTimeDataCollector spinning...')

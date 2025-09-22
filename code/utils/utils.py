@@ -85,22 +85,33 @@ def create_dataset_filter(joints_filter, joints_folder, obs):
     return dic_jo
 
 
-def create_dataset(X, Y, names, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path):
+def create_dataset(debug,X, Y, names, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path):
     
     dic_jo = {'test':{'X':[], 'Y':[], 'names':[], 'kps':[], 'boxes_3d':[], 'boxes_2d':[], 'K':[], 'ego_pose':[], 'camera_pose':[], 'traj_3d_ego':[],  'image_path':[], 'traj_3d_fcos3d':[]}}
 
-    dic_jo['test']['X'].append(X)
-    dic_jo['test']['Y'].append(Y)
-    dic_jo['test']['names'].append(names)
-    dic_jo['test']['kps'].append(kps)
-    dic_jo['test']['boxes_3d'].append(boxes_3d)
-    dic_jo['test']['boxes_2d'].append(boxes_2d)
+    # Use extend instead of append to avoid creating nested lists [[[]]]
+    dic_jo['test']['X'].extend(X)
+    dic_jo['test']['Y'].extend(Y)
+    dic_jo['test']['names'].extend(names)
+    dic_jo['test']['kps'].extend(kps)
+    dic_jo['test']['boxes_3d'].extend(boxes_3d)
+    dic_jo['test']['boxes_2d'].extend(boxes_2d)
+    # K is not a list of sequences, so append it
     dic_jo['test']['K'].append(K)
-    dic_jo['test']['ego_pose'].append(ego_pose)
-    dic_jo['test']['camera_pose'].append(camera_pose)
-    dic_jo['test']['traj_3d_ego'].append(traj_3d_ego)
-    dic_jo['test']['image_path'].append(image_path)
-
+    dic_jo['test']['ego_pose'].extend(ego_pose)
+    dic_jo['test']['camera_pose'].extend(camera_pose)
+    dic_jo['test']['traj_3d_ego'].extend(traj_3d_ego)
+    dic_jo['test']['image_path'].extend(image_path)
+    
+    ##save to json as debug with an if
+    if debug:
+        debug_dir = '../../debug'
+        os.makedirs(debug_dir, exist_ok=True)
+        debug_path = os.path.join(debug_dir, 'create_dataset_debug.json')
+        with open(debug_path, 'w') as f:
+            json.dump(dic_jo, f)
+        print(f"Debug data saved to {debug_path}")
+    
     return dic_jo
 
 

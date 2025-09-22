@@ -5,3 +5,4 @@ code/data/nusc_ped_data/
 __pycache__/
 *.zip
 code/output/
+check_quaternions.py

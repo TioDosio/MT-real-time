@@ -4,7 +4,7 @@ from pyquaternion import Quaternion
 from pytorch3d.transforms import quaternion_to_matrix
 import torch
 from scipy.spatial.transform import Rotation
-from camera import project_3d, correct_angle, preprocess_monoloco, to_spherical
+from .camera import project_3d, correct_angle, preprocess_monoloco, to_spherical
 import math
 import os
 
@@ -77,7 +77,7 @@ def extract_ground_truth(box_obj, kk, spherical=True):
 
     return boxes_gt, boxes_3d, ys
 
-def process_frames(seq_len, interval, renumbered_local_frames, renumbered_ego_frames):
+def process_frames(seq_len, interval, renumbered_local_frames, renumbered_ego_frames, renumbered_camera_frames):
 
     # make 2d array to record frame and appering id
     frame_appearing_id = []
@@ -97,8 +97,6 @@ def process_frames(seq_len, interval, renumbered_local_frames, renumbered_ego_fr
         
         frame_appearing_id.append([frame_num, appearing_id])
 
-
-
     # resolution: 1280 x 720
     # data format: 
     # {'X':[], 'Y':[], 'kps':[], 'boxes_3d':[], 'boxes_2d':[],'ego_pose':[], 'traj_3d_ego':[], 'name':[]}
@@ -112,6 +110,7 @@ def process_frames(seq_len, interval, renumbered_local_frames, renumbered_ego_fr
     boxes_3d_ls = []
     boxes_2d_seq_ls = []
     ego_pose_ls = []
+    camera_pose_ls = []
     traj_3d_ego_ls = []
     image_path_ls = []
 
@@ -146,6 +145,7 @@ def process_frames(seq_len, interval, renumbered_local_frames, renumbered_ego_fr
                 boxes_3d_seq = []
                 boxes_2d_seq = []
                 ego_pose_seq = []
+                camera_pose_seq = []
                 ego_pose_check_seq = []
                 traj_3d_ego_seq = []
 
@@ -158,6 +158,9 @@ def process_frames(seq_len, interval, renumbered_local_frames, renumbered_ego_fr
 
                     ego_frame_data = renumbered_ego_frames[frame_no]
                     ego_pose = ego_frame_data['coordinates']
+                    
+                    camera_frame_data = renumbered_camera_frames[frame_no]
+                    camera_pose_coords = camera_frame_data['coordinates']
 
                     for coord in coord_ls:
                         if coord['id'] == id:
@@ -171,9 +174,9 @@ def process_frames(seq_len, interval, renumbered_local_frames, renumbered_ego_fr
                             boxes_2d_seq.append(coord['bbox']) # xyxy
                             ego_pose_new = [ego_pose['q4'], ego_pose['q1'], ego_pose['q2'], ego_pose['q3'], ego_pose['x'], ego_pose['y'],  ego_pose['z']]
                             ego_pose_seq.append(ego_pose_new) # xyzq1q2q3q4
+                            camera_pose = [camera_pose_coords['q4'], camera_pose_coords['q1'], camera_pose_coords['q2'], camera_pose_coords['q3'], camera_pose_coords['x'], camera_pose_coords['y'], camera_pose_coords['z']]
+                            camera_pose_seq.append(camera_pose) # xyzq1q2q3q4
                             name_seq.append(frame_name)
-                            
-
 
                 # local to global
                 boxes_3d_seq_np = np.array(boxes_3d_seq)

@@ -6,3 +6,4 @@ __pycache__/
 *.zip
 code/output/
 check_quaternions.py
+*.json

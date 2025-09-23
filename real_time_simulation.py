@@ -20,7 +20,7 @@ class RealTimeDataCollector:
         self.latest_camera_tf = None
         self.seq_len = 10
         self.interval = 5 # our detection frequency is 5Hz, so interval of 5 means 1 second
-        self.debug = False
+        self.debug = True
 
         rospy.init_node('real_time_data_collector', anonymous=True)
         
@@ -63,10 +63,10 @@ class RealTimeDataCollector:
             
         self.create_local_frame(msg)
         renumbered_local_frames, renumbered_ego_frames = self.renumber_frames()
-        #self.save_frames(renumbered_local_frames, renumbered_ego_frames)
-        
+
         if len(self.local_frames) > self.seq_len * self.interval + 1:
             X, Y, name, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path = process_frames(self.seq_len, self.interval, renumbered_local_frames, renumbered_ego_frames, self.camera_frames)
+            self.save_json(X, Y, name, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path)
             observations, ground_truth, predictions = self.evaluator.evaluate_traj_pred(self.debug, X, Y, name, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path)
             #self.trajectory_evaluator.publish_trajectory(observations, ground_truth, predictions)
 
@@ -192,17 +192,44 @@ class RealTimeDataCollector:
         
         return renumbered_local_frames, renumbered_ego_frames
 
-    def save_frames(self, local_frame_data, ego_frame_data):
-        outdir = os.path.join('code', 'real_time_data', 'files')
-        os.makedirs(outdir, exist_ok=True)
-        local_file_path = os.path.join(outdir, 'local_frames.json')
-        with open(local_file_path, 'a') as f:
-            for frame_data in local_frame_data:
-                f.write(json.dumps(frame_data) + '\n')
-        ego_file_path = os.path.join(outdir, 'ego_frames.json')
-        with open(ego_file_path, 'a') as f:
-            for frame_data in ego_frame_data:
-                f.write(json.dumps(frame_data) + '\n')
+    def save_json(self, X, Y, name, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path):
+        """
+        Save the processed data in the same format as the training data JSON files
+        """
+        # Create the data structure matching the expected format
+        data = {
+            "X": X,
+            "Y": Y,
+            "names": name,
+            "kps": kps,
+            "boxes_3d": boxes_3d,
+            "boxes_2d": boxes_2d,
+            "K": K,
+            "ego_pose": ego_pose,
+            "camera_pose": camera_pose,
+            "traj_3d_ego": traj_3d_ego,
+            "image_path": image_path,
+            "clst_ls": ["20"] * len(X) if X else []  # Default cluster labels
+        }
+        
+        # Create output directory if it doesn't exist
+        output_dir = "code/real_time_data/test"
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # Generate filename with timestamp
+        import time
+        timestamp = int(time.time())
+        filename = f"realtime_data_{timestamp}.json"
+        filepath = os.path.join(output_dir, filename)
+        
+        # Save to JSON file
+        try:
+            with open(filepath, 'w') as f:
+                json.dump(data, f, indent=2)
+            print(f"Saved real-time data to: {filepath}")
+        except Exception as e:
+            print(f"Error saving JSON file: {e}")
+
 
 if __name__ == '__main__':
     collector = RealTimeDataCollector()

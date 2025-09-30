@@ -20,7 +20,7 @@ def main():
             # Look up the transform from base_footprint to odom (robot's position in world)
             # This gives you the robot's pose relative to the odometry frame
             robot_trans = tf_buffer.lookup_transform('odom', 'base_footprint', rospy.Time(0), rospy.Duration(0.1))
-            robot_trans.child_frame_id = "base_footprint"  # Add identifier
+            robot_trans.child_frame_id = "frame1"  # Add identifier
             transforms.append(robot_trans)
             
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
@@ -31,8 +31,8 @@ def main():
         try:
             # Look up the transform from odom to camera_link (camera's position in world)
             # This gives you the camera's pose relative to the odometry frame
-            camera_trans = tf_buffer.lookup_transform('odom', 'l_eye_link', rospy.Time(0), rospy.Duration(0.1))
-            camera_trans.child_frame_id = "l_eye_link"  # Add identifier
+            camera_trans = tf_buffer.lookup_transform('odom', 'base_footprint', rospy.Time(0), rospy.Duration(0.1))
+            camera_trans.child_frame_id = "frame2"  # Add identifier
             transforms.append(camera_trans)
             
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:

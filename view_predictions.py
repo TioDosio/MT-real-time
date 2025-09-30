@@ -1,11 +1,8 @@
-#!/usr/bin/env python3
-
 import rospy
 import numpy as np
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Point
 from std_msgs.msg import ColorRGBA
-import math
 
 class TrajectoryEvaluator:
     def __init__(self):
@@ -81,7 +78,7 @@ class TrajectoryEvaluator:
             
         # Create line strip for trajectory
         line_marker = Marker()
-        line_marker.header.frame_id = "map"  # Adjust frame_id as needed
+        line_marker.header.frame_id = "odom"  # Adjust frame_id as needed
         line_marker.header.stamp = rospy.Time.now()
         line_marker.ns = f"{namespace}_line"
         line_marker.id = marker_id_offset
@@ -104,7 +101,7 @@ class TrajectoryEvaluator:
         # Create sphere markers for individual points
         for i, point in enumerate(points):
             sphere_marker = Marker()
-            sphere_marker.header.frame_id = "map"
+            sphere_marker.header.frame_id = "odom"
             sphere_marker.header.stamp = rospy.Time.now()
             sphere_marker.ns = f"{namespace}_points"
             sphere_marker.id = marker_id_offset + i + 1
@@ -127,10 +124,10 @@ class TrajectoryEvaluator:
         """
         Publish trajectory visualizations to RViz using pre-initialized publishers
         """
-        # Define colors
-        blue_color = ColorRGBA(0.0, 0.0, 1.0, 0.8)    # Blue for observations
+        # Define colors with adjusted opacity
+        blue_color = ColorRGBA(0.0, 0.0, 1.0, 0.3)    # Blue for observations (reduced opacity)
         green_color = ColorRGBA(0.0, 1.0, 0.0, 0.8)   # Green for ground truth
-        red_color = ColorRGBA(1.0, 0.0, 0.0, 0.8)     # Red for predictions
+        red_color = ColorRGBA(1.0, 0.0, 0.0, 1.0)     # Red for predictions (full opacity)
         
         # Create and publish observed trajectory
         obs_markers = self.create_trajectory_markers(observations, "observed", blue_color, 0)
@@ -146,55 +143,132 @@ class TrajectoryEvaluator:
         
         print("Published trajectory markers to RViz")
 
-    def print_metrics(self, ade, fde, pred_horizon, total_distance):
+    def detailed_position_analysis(self, observations, ground_truth, predictions):
         """
-        Print formatted metrics results
+        Detailed position analysis showing recent positions from all data sources
         """
-        print("\n" + "="*50)
-        print("TRAJECTORY EVALUATION RESULTS")
-        print("="*50)
+        print("\n--- Detailed Position Analysis ---")
         
-        if ade is not None:
-            print(f"Average Displacement Error (ADE): {ade:.4f} meters")
-            print(f"Final Displacement Error (FDE): {fde:.4f} meters")
-            print(f"Prediction Horizon: {pred_horizon} time steps")
-            print(f"Total GT Distance: {total_distance:.4f} meters")
-            if total_distance > 0:
-                print(f"ADE as % of total distance: {(ade/total_distance)*100:.2f}%")
+        # Get the latest person detection data for comparison
+        if not self.local_frames:
+            print("No local frames available for comparison")
+            return
+            
+        # Extract the recent detection coordinates for comparison
+        number_frames = self.seq_len * self.interval + 1
+        if len(self.local_frames) >= number_frames:
+            recent_frames = self.local_frames[-number_frames:]
+            
+            # Extract person positions from the detection frames
+            original_positions = []
+            for i, frame in enumerate(recent_frames):
+                if frame and 'coordinates' in frame and frame['coordinates']:
+                    person = frame['coordinates'][0]  # First person
+                    if 'x' in person and 'z' in person:
+                        original_positions.append([person['x'], person['z']])
+                    else:
+                        print(f"Warning: Missing x/z in frame {i}")
+                        continue
+                else:
+                    print(f"Warning: No coordinates in frame {i}")
+                    continue
+            
+            if not original_positions:
+                print("No valid original positions found")
+                return
+                
+            original_positions = np.array(original_positions)
+            print(f"Extracted {len(original_positions)} original positions")
         else:
-            print("Could not calculate metrics - invalid data")
+            print(f"Not enough frames for analysis: {len(self.local_frames)}/{number_frames}")
+            return
         
-        print("="*50)
-
-    def evaluate_and_visualize(self, observations, ground_truth, predictions):
-        """
-        Complete function to calculate metrics and publish visualizations
-        """
-        # Calculate metrics
-        ade, fde, pred_horizon, total_distance = self.calculate_metrics(observations, ground_truth, predictions)
+        # Recent original detection positions
+        print("Recent original detection positions:")
+        for i, pos in enumerate(original_positions[-5:]):  # Show last 5 positions
+            frame_idx = len(original_positions) - 5 + i
+            print(f"  Frame {frame_idx}: x={pos[0]:.4f}, y={pos[1]:.4f}")
         
-        # Print metrics
-        self.print_metrics(ade, fde, pred_horizon, total_distance)
+        # Corresponding observation positions
+        if observations and len(observations) > 0:
+            try:
+                obs_array = np.array(observations[0])
+                print(f"Observation positions (total: {len(obs_array)}):")
+                for i, pos in enumerate(obs_array[-5:]):  # Show last 5 positions
+                    frame_idx = len(obs_array) - 5 + i
+                    print(f"  Frame {frame_idx}: x={pos[0]:.4f}, y={pos[1]:.4f}")
+            except Exception as e:
+                print(f"Error processing observations: {e}")
+        else:
+            print("No observations available")
         
-        # Publish visualizations
-        self.publish_trajectories_to_rviz(observations, ground_truth, predictions)
+        # Corresponding ground truth positions
+        if ground_truth and len(ground_truth) > 0:
+            try:
+                gt_array = np.array(ground_truth[0])
+                print(f"Ground truth positions (total: {len(gt_array)}):")
+                for i, pos in enumerate(gt_array[-5:]):  # Show last 5 positions
+                    frame_idx = len(gt_array) - 5 + i
+                    print(f"  Frame {frame_idx}: x={pos[0]:.4f}, y={pos[1]:.4f}")
+            except Exception as e:
+                print(f"Error processing ground truth: {e}")
+        else:
+            print("No ground truth available")
         
-        return ade, fde
-
-    def publish_trajectory(self, observations, ground_truth, predictions):
-        """
-        Main method to be called from real_time_simulation.py
-        Combines evaluation and visualization
-        """
-        return self.evaluate_and_visualize(observations, ground_truth, predictions)
-
-# Backward compatibility functions for standalone usage
-def publish_trajectory(observations, ground_truth, predictions):
-    """
-    Function wrapper for backward compatibility
-    Creates a temporary instance if needed
-    """
-    if not hasattr(publish_trajectory, 'evaluator'):
-        publish_trajectory.evaluator = TrajectoryEvaluator()
-    
-    return publish_trajectory.evaluator.publish_trajectory(observations, ground_truth, predictions)
+        # Predicted future positions
+        if predictions is not None and len(predictions) > 0:
+            try:
+                pred_array = np.array(predictions)
+                print(f"Predicted future positions (total: {len(pred_array)}):")
+                for i, pos in enumerate(pred_array):
+                    print(f"  Future step {i+1}: x={pos[0]:.4f}, y={pos[1]:.4f}")
+            except Exception as e:
+                print(f"Error processing predictions: {e}")
+        else:
+            print("No predictions available")
+        
+        # Side-by-side comparison of last known positions
+        print("\n--- Side-by-Side Comparison (Last Known Positions) ---")
+        if len(original_positions) > 0:
+            last_original = original_positions[-1]
+            print(f"Original:     x={last_original[0]:.4f}, y={last_original[1]:.4f}")
+            
+            if observations and len(observations) > 0:
+                try:
+                    obs_array = np.array(observations[0])
+                    if len(obs_array) > 0:
+                        last_obs = obs_array[-1]
+                        print(f"Observation:  x={last_obs[0]:.4f}, y={last_obs[1]:.4f}")
+                        
+                        # Calculate difference
+                        diff = np.linalg.norm(last_original - last_obs)
+                        print(f"Obs-Orig diff: {diff:.4f}m")
+                except Exception as e:
+                    print(f"Error comparing observations: {e}")
+            
+            if ground_truth and len(ground_truth) > 0:
+                try:
+                    gt_array = np.array(ground_truth[0])
+                    if len(gt_array) > 0:
+                        last_gt = gt_array[-1]
+                        print(f"Ground Truth: x={last_gt[0]:.4f}, y={last_gt[1]:.4f}")
+                        
+                        # Calculate difference
+                        diff = np.linalg.norm(last_original - last_gt)
+                        print(f"GT-Orig diff:  {diff:.4f}m")
+                except Exception as e:
+                    print(f"Error comparing ground truth: {e}")
+            
+            if predictions is not None and len(predictions) > 0:
+                try:
+                    pred_array = np.array(predictions)
+                    first_pred = pred_array[0]
+                    print(f"First Pred:   x={first_pred[0]:.4f}, y={first_pred[1]:.4f}")
+                    
+                    # Calculate difference from last known position
+                    diff = np.linalg.norm(last_original - first_pred)
+                    print(f"Pred-Orig diff: {diff:.4f}m")
+                except Exception as e:
+                    print(f"Error comparing predictions: {e}")
+        
+        print("--- End Position Analysis ---\n")

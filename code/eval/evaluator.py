@@ -23,7 +23,7 @@ class Evaluator:
         self.r_seed = 42
         self.bs = 1
         self.obs = 10
-        self.pred = 10
+        self.pred = 5
         self.loc_cfg_path = "code/configs/localization.yaml"
         self.traj_cfg_path = "code/configs/traj_pred.yaml"
         self.joints_folder = "code/real_time_data/"
@@ -179,8 +179,8 @@ class Evaluator:
                             d4 = (gt_xy[last_idx,1].detach().cpu().numpy() - pred_xy[last_idx,1].detach().cpu().numpy())
                             dist_fde = [d3,d4]
                             scene_fde = np.linalg.norm(dist_fde)
-                            fde_batch += scene_fde
                         
+                        fde_batch += scene_fde
                         total_samples += 1
                 
                 batch_id+=1

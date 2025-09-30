@@ -143,21 +143,21 @@ class TrajectoryEvaluator:
         
         print("Published trajectory markers to RViz")
 
-    def detailed_position_analysis(self, observations, ground_truth, predictions):
+    def detailed_position_analysis(self, observations, ground_truth, predictions, local_frames, seq_len, interval):
         """
         Detailed position analysis showing recent positions from all data sources
         """
         print("\n--- Detailed Position Analysis ---")
         
         # Get the latest person detection data for comparison
-        if not self.local_frames:
+        if not local_frames:
             print("No local frames available for comparison")
             return
             
         # Extract the recent detection coordinates for comparison
-        number_frames = self.seq_len * self.interval + 1
-        if len(self.local_frames) >= number_frames:
-            recent_frames = self.local_frames[-number_frames:]
+        number_frames = seq_len * interval + 1
+        if len(local_frames) >= number_frames:
+            recent_frames = local_frames[-number_frames:]
             
             # Extract person positions from the detection frames
             original_positions = []
@@ -180,7 +180,7 @@ class TrajectoryEvaluator:
             original_positions = np.array(original_positions)
             print(f"Extracted {len(original_positions)} original positions")
         else:
-            print(f"Not enough frames for analysis: {len(self.local_frames)}/{number_frames}")
+            print(f"Not enough frames for analysis: {len(local_frames)}/{number_frames}")
             return
         
         # Recent original detection positions

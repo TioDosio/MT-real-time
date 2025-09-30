@@ -1,6 +1,8 @@
+from doctest import debug
 import rospy
 import json
 import os
+import numpy as np
 from human_awareness_msgs.msg import PersonsList
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Point, TransformStamped
@@ -20,11 +22,11 @@ class RealTimeDataCollector:
         self.latest_camera_tf = None
         self.seq_len = 10
         self.interval = 5 # our detection frequency is 5Hz, so interval of 5 means 1 second
-        self.debug = True
+        self.debug = False
 
         rospy.init_node('real_time_data_collector', anonymous=True)
         
-        # Initialize the evaluator and trajectory evaluator once
+        # Initialize the evaluator and trajectory evaluator classes
         self.evaluator = Evaluator()
         self.trajectory_evaluator = TrajectoryEvaluator()
         
@@ -38,9 +40,9 @@ class RealTimeDataCollector:
     def tf_callback(self, msg):
         # Extract robot and camera transforms from TFMessage
         for i, transform in enumerate(msg.transforms):
-            if transform.child_frame_id == "base_footprint":
+            if transform.child_frame_id == "frame1":
                 self.latest_robot_tf = transform
-            elif transform.child_frame_id == "l_eye_link" or "camera" in transform.child_frame_id.lower():
+            elif transform.child_frame_id == "frame2":
                 self.latest_camera_tf = transform
 
     def image_detections_callback(self, msg):
@@ -60,15 +62,20 @@ class RealTimeDataCollector:
             print("Warning: Missing robot TF data, but continuing with camera data")
         elif not camera_created:
             print("Warning: Missing camera TF data, but continuing with robot data")
-            
+
         self.create_local_frame(msg)
         renumbered_local_frames, renumbered_ego_frames = self.renumber_frames()
 
         if len(self.local_frames) > self.seq_len * self.interval + 1:
             X, Y, name, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path = process_frames(self.seq_len, self.interval, renumbered_local_frames, renumbered_ego_frames, self.camera_frames)
-            self.save_json(X, Y, name, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path)
             observations, ground_truth, predictions = self.evaluator.evaluate_traj_pred(self.debug, X, Y, name, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path)
-            #self.trajectory_evaluator.publish_trajectory(observations, ground_truth, predictions)
+            
+            # Compare with original detection points
+            self.trajectory_evaluator.detailed_position_analysis(observations, ground_truth, predictions)
+            self.trajectory_evaluator.publish_trajectories_to_rviz(observations, ground_truth, predictions)
+            
+            if self.debug:          
+                self.save_json(X, Y, name, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path)
 
 
     def spin(self):
@@ -173,11 +180,11 @@ class RealTimeDataCollector:
         # Initialize return variables
         renumbered_local_frames = []
         renumbered_ego_frames = []
-        
+
         if len(self.local_frames) >= number_frames:
-            # Get the first number_frames frames in chronological order and renumber them starting from 0
-            local_frames_subset = self.local_frames[:number_frames]
-            ego_frames_subset = self.ego_frames[:number_frames]
+            # Get the last number_frames frames in chronological order and renumber them starting from 0
+            local_frames_subset = self.local_frames[-number_frames:]
+            ego_frames_subset = self.ego_frames[-number_frames:]
             
             # Renumber frames starting from 0, frames from the detection dont have a numbered id
             for i, frame in enumerate(local_frames_subset):

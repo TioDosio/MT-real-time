@@ -8,7 +8,9 @@ Panels:
         - /Status1
         - /Grid1
         - /TF1/Frames1
-        - /Camera View1
+        - /MarkerArray1
+        - /MarkerArray2
+        - /MarkerArray3
       Splitter Ratio: 0.5
     Tree Height: 264
   - Class: rviz/Selection
@@ -62,13 +64,31 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        b_caster_wheel_link:
+          Value: true
         base_footprint:
           Value: true
         base_link:
           Value: true
+        ego_frame:
+          Value: true
         eyes_center_link:
           Value: true
+        eyes_center_vision_link:
+          Value: true
         eyes_tilt_link:
+          Value: true
+        f_caster_wheel_link:
+          Value: true
+        face_shell_link:
+          Value: true
+        head_origin_frame:
+          Value: true
+        head_shell_link:
+          Value: true
+        l_camera_link:
+          Value: true
+        l_camera_vision_link:
           Value: true
         l_elbow_flection_link:
           Value: true
@@ -92,11 +112,23 @@ Visualization Manager:
           Value: true
         map:
           Value: true
+        nav_hokuyo_laser_link:
+          Value: true
+        nav_hokuyo_link:
+          Value: true
+        nav_hokuyo_rear_laser_link:
+          Value: true
+        nav_hokuyo_rear_link:
+          Value: true
         neck_pan_link:
           Value: true
         neck_tilt_link:
           Value: true
         odom:
+          Value: true
+        r_camera_link:
+          Value: true
+        r_camera_vision_link:
           Value: true
         r_elbow_flection_link:
           Value: true
@@ -118,6 +150,28 @@ Visualization Manager:
           Value: true
         r_wrist_flection_link:
           Value: true
+        realsense_bottom_screw_frame:
+          Value: true
+        realsense_color_frame:
+          Value: true
+        realsense_color_optical_frame:
+          Value: true
+        realsense_depth_frame:
+          Value: true
+        realsense_depth_optical_frame:
+          Value: true
+        realsense_left_ir_frame:
+          Value: true
+        realsense_left_ir_optical_frame:
+          Value: true
+        realsense_link:
+          Value: true
+        realsense_right_ir_frame:
+          Value: true
+        realsense_right_ir_optical_frame:
+          Value: true
+        waist_fixed_virtual_link:
+          Value: true
         waist_link:
           Value: true
       Marker Scale: 0.5
@@ -126,52 +180,84 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        base_link:
-          l_wheel_link:
-            {}
-          r_wheel_link:
-            {}
-          waist_link:
-            l_shoulder_scapula_link:
-              l_shoulder_flection_link:
-                l_shoulder_abduction_link:
-                  l_shoulder_rotation_link:
-                    l_elbow_flection_link:
-                      l_forearm_pronation_link:
-                        l_wrist_abduction_link:
-                          l_wrist_flection_link:
-                            {}
-            neck_pan_link:
-              neck_tilt_link:
-                eyes_tilt_link:
-                  {}
-            r_shoulder_scapula_link:
-              r_shoulder_flection_link:
-                r_shoulder_abduction_link:
-                  r_shoulder_rotation_link:
-                    r_elbow_flection_link:
-                      r_forearm_pronation_link:
-                        r_wrist_abduction_link:
-                          r_wrist_flection_link:
-                            {}
-        eyes_center_link:
-          l_eye_link:
-            {}
-          r_eye_link:
-            {}
         map:
           odom:
             base_footprint:
-              {}
+              base_link:
+                b_caster_wheel_link:
+                  {}
+                f_caster_wheel_link:
+                  {}
+                l_wheel_link:
+                  {}
+                nav_hokuyo_link:
+                  nav_hokuyo_laser_link:
+                    {}
+                nav_hokuyo_rear_link:
+                  nav_hokuyo_rear_laser_link:
+                    {}
+                r_wheel_link:
+                  {}
+                waist_fixed_virtual_link:
+                  {}
+                waist_link:
+                  ego_frame:
+                    {}
+                  l_shoulder_scapula_link:
+                    l_shoulder_flection_link:
+                      l_shoulder_abduction_link:
+                        l_shoulder_rotation_link:
+                          l_elbow_flection_link:
+                            l_forearm_pronation_link:
+                              l_wrist_abduction_link:
+                                l_wrist_flection_link:
+                                  {}
+                  neck_pan_link:
+                    neck_tilt_link:
+                      eyes_tilt_link:
+                        eyes_center_link:
+                          eyes_center_vision_link:
+                            {}
+                          l_eye_link:
+                            l_camera_link:
+                              {}
+                            l_camera_vision_link:
+                              {}
+                          r_eye_link:
+                            r_camera_link:
+                              {}
+                            r_camera_vision_link:
+                              {}
+                      face_shell_link:
+                        {}
+                      head_origin_frame:
+                        {}
+                      head_shell_link:
+                        {}
+                  r_shoulder_scapula_link:
+                    r_shoulder_flection_link:
+                      r_shoulder_abduction_link:
+                        r_shoulder_rotation_link:
+                          r_elbow_flection_link:
+                            r_forearm_pronation_link:
+                              r_wrist_abduction_link:
+                                r_wrist_flection_link:
+                                  {}
+                  realsense_bottom_screw_frame:
+                    realsense_link:
+                      realsense_depth_frame:
+                        realsense_color_frame:
+                          realsense_color_optical_frame:
+                            {}
+                        realsense_depth_optical_frame:
+                          {}
+                        realsense_left_ir_frame:
+                          realsense_left_ir_optical_frame:
+                            {}
+                        realsense_right_ir_frame:
+                          realsense_right_ir_optical_frame:
+                            {}
       Update Interval: 0
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /trajectory_predictions
-      Name: Trajectory Predictions
-      Namespaces:
-        {}
-      Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
@@ -182,7 +268,7 @@ Visualization Manager:
       Queue Size: 100
       Value: true
     - Class: rviz/Image
-      Enabled: false
+      Enabled: true
       Image Topic: /vizzy/l_camera/suppressed_image_rect_color_sd
       Max Value: 1
       Median window: 5
@@ -192,7 +278,7 @@ Visualization Manager:
       Queue Size: 2
       Transport Hint: compressed
       Unreliable: false
-      Value: false
+      Value: true
     - Alpha: 1
       Arrow Length: 0.30000001192092896
       Axes Length: 0.30000001192092896
@@ -225,24 +311,31 @@ Visualization Manager:
       Topic: /raw_heads
       Unreliable: false
       Value: true
-    - Class: rviz/Image
+    - Class: rviz/MarkerArray
       Enabled: true
-      Image Topic: /yolo/annotated_pose
-      Max Value: 1
-      Median window: 5
-      Min Value: 0
-      Name: Image
-      Normalize Range: true
-      Queue Size: 2
-      Transport Hint: compressed
-      Unreliable: false
+      Marker Topic: /trajectory_ground_truth
+      Name: MarkerArray
+      Namespaces:
+        ground_truth_line: true
+        ground_truth_points: true
+      Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /yolo/ground_positions
+      Marker Topic: /trajectory_observed
       Name: MarkerArray
       Namespaces:
-        {}
+        observed_line: true
+        observed_points: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /trajectory_predictions
+      Name: MarkerArray
+      Namespaces:
+        predictions_line: true
+        predictions_points: true
       Queue Size: 100
       Value: true
   Enabled: true
@@ -273,25 +366,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 11.213153839111328
+      Distance: 23.666149139404297
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 4.235567092895508
-        Y: -0.65540611743927
-        Z: 2.988926649093628
+        X: 4.334104537963867
+        Y: 2.4359755516052246
+        Z: 4.869048595428467
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.9397965669631958
+      Pitch: 1.0747970342636108
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 6.005406856536865
+      Yaw: 0.312220960855484
     Saved: ~
 Window Geometry:
   Camera View:
@@ -301,9 +394,7 @@ Window Geometry:
   Height: 987
   Hide Left Dock: false
   Hide Right Dock: false
-  Image:
-    collapsed: false
-  QMainWindow State: 000000ff00000000fd00000001000000000000024400000385fc0200000004fc0000003b000001d3000000310100001afa000000000100000002fb0000000a0049006d0061006700650100000000ffffffff0000005a00fffffffb0000001600430061006d006500720061002000560069006500770100000000000002440000008400fffffffc00000214000001ac000000e20100001afa000000000100000005fb000000100044006900730070006c0061007900730100000000000003d80000015600fffffffb0000000800540069006d00650100000000ffffffff0000024400fffffffb0000000a005600690065007700730100000000ffffffff0000010000fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000000ffffffff0000008f00fffffffb0000001200530065006c0065006300740069006f006e0100000000ffffffff0000006c00fffffffb0000000c00430061006d006500720061010000038e000000160000000000000000fb0000000a0049006d00610067006501000003aa0000001600000000000000000000052a0000038500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000001000000000000038100000385fc0200000004fc0000003b000001d30000001600fffffffa000000010100000002fb0000000a0049006d0061006700650100000000ffffffff0000000000000000fb0000001600430061006d006500720061002000560069006500770100000000000002440000008400fffffffc00000214000001ac000000e20100001afa000000000100000005fb000000100044006900730070006c0061007900730100000000000003d80000015600fffffffb0000000800540069006d00650100000000ffffffff0000024400fffffffb0000000a005600690065007700730100000000ffffffff0000010000fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000000ffffffff0000008f00fffffffb0000001200530065006c0065006300740069006f006e0100000000ffffffff0000006c00fffffffb0000000c00430061006d006500720061010000038e000000160000000000000000fb0000000a0049006d00610067006501000003aa000000160000000000000000000003ed0000038500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:

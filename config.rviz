@@ -1,0 +1,317 @@
+Panels:
+  - Class: rviz/Displays
+    Help Height: 78
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /Global Options1
+        - /Status1
+        - /Grid1
+        - /TF1/Frames1
+        - /Camera View1
+      Splitter Ratio: 0.5
+    Tree Height: 264
+  - Class: rviz/Selection
+    Name: Selection
+  - Class: rviz/Tool Properties
+    Expanded:
+      - /2D Pose Estimate1
+      - /2D Nav Goal1
+      - /Publish Point1
+    Name: Tool Properties
+    Splitter Ratio: 0.5886790156364441
+  - Class: rviz/Views
+    Expanded:
+      - /Current View1
+    Name: Views
+    Splitter Ratio: 0.5
+  - Class: rviz/Time
+    Experimental: false
+    Name: Time
+    SyncMode: 0
+    SyncSource: Camera View
+Preferences:
+  PromptSaveOnExit: true
+Toolbars:
+  toolButtonStyle: 2
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Alpha: 0.5
+      Cell Size: 1
+      Class: rviz/Grid
+      Color: 160; 160; 164
+      Enabled: true
+      Line Style:
+        Line Width: 0.029999999329447746
+        Value: Lines
+      Name: Grid
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 20
+      Reference Frame: <Fixed Frame>
+      Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Filter (blacklist): ""
+      Filter (whitelist): ""
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        base_footprint:
+          Value: true
+        base_link:
+          Value: true
+        eyes_center_link:
+          Value: true
+        eyes_tilt_link:
+          Value: true
+        l_elbow_flection_link:
+          Value: true
+        l_eye_link:
+          Value: true
+        l_forearm_pronation_link:
+          Value: true
+        l_shoulder_abduction_link:
+          Value: true
+        l_shoulder_flection_link:
+          Value: true
+        l_shoulder_rotation_link:
+          Value: true
+        l_shoulder_scapula_link:
+          Value: true
+        l_wheel_link:
+          Value: true
+        l_wrist_abduction_link:
+          Value: true
+        l_wrist_flection_link:
+          Value: true
+        map:
+          Value: true
+        neck_pan_link:
+          Value: true
+        neck_tilt_link:
+          Value: true
+        odom:
+          Value: true
+        r_elbow_flection_link:
+          Value: true
+        r_eye_link:
+          Value: true
+        r_forearm_pronation_link:
+          Value: true
+        r_shoulder_abduction_link:
+          Value: true
+        r_shoulder_flection_link:
+          Value: true
+        r_shoulder_rotation_link:
+          Value: true
+        r_shoulder_scapula_link:
+          Value: true
+        r_wheel_link:
+          Value: true
+        r_wrist_abduction_link:
+          Value: true
+        r_wrist_flection_link:
+          Value: true
+        waist_link:
+          Value: true
+      Marker Scale: 0.5
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        base_link:
+          l_wheel_link:
+            {}
+          r_wheel_link:
+            {}
+          waist_link:
+            l_shoulder_scapula_link:
+              l_shoulder_flection_link:
+                l_shoulder_abduction_link:
+                  l_shoulder_rotation_link:
+                    l_elbow_flection_link:
+                      l_forearm_pronation_link:
+                        l_wrist_abduction_link:
+                          l_wrist_flection_link:
+                            {}
+            neck_pan_link:
+              neck_tilt_link:
+                eyes_tilt_link:
+                  {}
+            r_shoulder_scapula_link:
+              r_shoulder_flection_link:
+                r_shoulder_abduction_link:
+                  r_shoulder_rotation_link:
+                    r_elbow_flection_link:
+                      r_forearm_pronation_link:
+                        r_wrist_abduction_link:
+                          r_wrist_flection_link:
+                            {}
+        eyes_center_link:
+          l_eye_link:
+            {}
+          r_eye_link:
+            {}
+        map:
+          odom:
+            base_footprint:
+              {}
+      Update Interval: 0
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /trajectory_predictions
+      Name: Trajectory Predictions
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /image_detections_markers
+      Name: Human Detection Data
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Image
+      Enabled: false
+      Image Topic: /vizzy/l_camera/suppressed_image_rect_color_sd
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: Camera View
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: compressed
+      Unreliable: false
+      Value: false
+    - Alpha: 1
+      Arrow Length: 0.30000001192092896
+      Axes Length: 0.30000001192092896
+      Axes Radius: 0.009999999776482582
+      Class: rviz/PoseArray
+      Color: 85; 255; 0
+      Enabled: true
+      Head Length: 0.07000000029802322
+      Head Radius: 0.029999999329447746
+      Name: PoseArray
+      Shaft Length: 0.23000000417232513
+      Shaft Radius: 0.009999999776482582
+      Shape: Arrow (Flat)
+      Topic: /raw_bodies
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Arrow Length: 0.30000001192092896
+      Axes Length: 0.30000001192092896
+      Axes Radius: 0.009999999776482582
+      Class: rviz/PoseArray
+      Color: 255; 25; 0
+      Enabled: true
+      Head Length: 0.07000000029802322
+      Head Radius: 0.029999999329447746
+      Name: PoseArray
+      Shaft Length: 0.23000000417232513
+      Shaft Radius: 0.009999999776482582
+      Shape: Arrow (Flat)
+      Topic: /raw_heads
+      Unreliable: false
+      Value: true
+    - Class: rviz/Image
+      Enabled: true
+      Image Topic: /yolo/annotated_pose
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: Image
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: compressed
+      Unreliable: false
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /yolo/ground_positions
+      Name: MarkerArray
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+  Enabled: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Default Light: true
+    Fixed Frame: odom
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz/Interact
+      Hide Inactive Objects: true
+    - Class: rviz/MoveCamera
+    - Class: rviz/Select
+    - Class: rviz/FocusCamera
+    - Class: rviz/Measure
+    - Class: rviz/SetInitialPose
+      Theta std deviation: 0.2617993950843811
+      Topic: /initialpose
+      X std deviation: 0.5
+      Y std deviation: 0.5
+    - Class: rviz/SetGoal
+      Topic: /move_base_simple/goal
+    - Class: rviz/PublishPoint
+      Single click: true
+      Topic: /clicked_point
+  Value: true
+  Views:
+    Current:
+      Class: rviz/Orbit
+      Distance: 11.213153839111328
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.05999999865889549
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
+      Focal Point:
+        X: 4.235567092895508
+        Y: -0.65540611743927
+        Z: 2.988926649093628
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.05000000074505806
+      Invert Z Axis: false
+      Name: Current View
+      Near Clip Distance: 0.009999999776482582
+      Pitch: 0.9397965669631958
+      Target Frame: <Fixed Frame>
+      Value: Orbit (rviz)
+      Yaw: 6.005406856536865
+    Saved: ~
+Window Geometry:
+  Camera View:
+    collapsed: false
+  Displays:
+    collapsed: false
+  Height: 987
+  Hide Left Dock: false
+  Hide Right Dock: false
+  Image:
+    collapsed: false
+  QMainWindow State: 000000ff00000000fd00000001000000000000024400000385fc0200000004fc0000003b000001d3000000310100001afa000000000100000002fb0000000a0049006d0061006700650100000000ffffffff0000005a00fffffffb0000001600430061006d006500720061002000560069006500770100000000000002440000008400fffffffc00000214000001ac000000e20100001afa000000000100000005fb000000100044006900730070006c0061007900730100000000000003d80000015600fffffffb0000000800540069006d00650100000000ffffffff0000024400fffffffb0000000a005600690065007700730100000000ffffffff0000010000fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000000ffffffff0000008f00fffffffb0000001200530065006c0065006300740069006f006e0100000000ffffffff0000006c00fffffffb0000000c00430061006d006500720061010000038e000000160000000000000000fb0000000a0049006d00610067006501000003aa0000001600000000000000000000052a0000038500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Selection:
+    collapsed: false
+  Time:
+    collapsed: false
+  Tool Properties:
+    collapsed: false
+  Views:
+    collapsed: false
+  Width: 1908
+  X: -32
+  Y: -32

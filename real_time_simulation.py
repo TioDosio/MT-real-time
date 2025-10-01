@@ -71,7 +71,7 @@ class RealTimeDataCollector:
             observations, ground_truth, predictions = self.evaluator.evaluate_traj_pred(self.debug, X, Y, name, kps, boxes_3d, boxes_2d, K, ego_pose, camera_pose, traj_3d_ego, image_path)
             
             # Compare with original detection points
-            self.trajectory_evaluator.detailed_position_analysis(observations, ground_truth, predictions)
+            self.trajectory_evaluator.detailed_position_analysis(observations, ground_truth, predictions, self.local_frames, self.seq_len, self.interval)
             self.trajectory_evaluator.publish_trajectories_to_rviz(observations, ground_truth, predictions)
             
             if self.debug:          
